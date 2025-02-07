@@ -2,16 +2,36 @@ from pg_extensions import *
 
 
 class Blocker:
-    def __init__(self, position, radius, color):
+    def __init__(self, position, color):
         self.position = position
-        self.radius = radius
         self.color = color
+
+    def is_inside(self, point):
+        return False
+
+
+class CircleBlocker(Blocker):
+    def __init__(self, position, color, radius):
+        super().__init__(position, color)
+        self.radius = radius
 
     def is_inside(self, point):
         return (point.x - self.position.x) ** 2 + (point.y - self.position.y) ** 2 <= self.radius**2
 
     def render(self):
         draw_circle(window.SURFACE, self.color, self.position, self.radius)
+
+
+class RectBlocker(Blocker):
+    def __init__(self, position, color, dimentions):
+        super().__init__(position, color)
+        self.dimentions = dimentions
+
+    def is_inside(self, point):
+        return self.position.x <= point.x and point.x < self.position.x + self.dimentions.x and self.position.y <= point.y and point.y < self.position.y + self.dimentions.y
+
+    def render(self):
+        draw_rectangle(window.SURFACE, self.color, self.position, self.dimentions)
 
 
 class Ray:
@@ -64,12 +84,16 @@ def start():
     global window, source, blocker
     window = get_window()
 
-    source = Source(Vector2(-200, 0), 100, 500, 100)
-    blocker = Blocker(Vector2(200, 0), 25, BLUE)
+    source = Source(Vector2(0, 0), 1000, 750, 100)
+    circleBlocker = CircleBlocker(Vector2(300, 100), BLUE, 25)
+    rectBlocker = RectBlocker(Vector2(400, 720), BLUE, Vector2(100, 1440))
+    blockers = [circleBlocker, rectBlocker]
 
-    source.compute([blocker])
+    source.compute(blockers)
 
-    blocker.render()
+    for blocker in blockers:
+        blocker.render()
+
     source.render(GREEN, 25, WHITE)
 
     set_window(window)
