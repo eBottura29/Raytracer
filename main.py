@@ -81,13 +81,30 @@ class Source:
 
 
 def start():
-    global window, source, blocker
+    global window, source, blockers, frame
     window = get_window()
 
-    source = Source(Vector2(0, 0), 1000, 750, 100)
+    source = Source(Vector2(-200, 0), 500, 750, 200)
     circleBlocker = CircleBlocker(Vector2(300, 100), BLUE, 25)
     rectBlocker = RectBlocker(Vector2(400, 720), BLUE, Vector2(100, 1440))
     blockers = [circleBlocker, rectBlocker]
+
+    frame = 0
+
+    set_window(window)
+
+
+def update():
+    global window, frame
+    window = get_window()
+    window.SURFACE.fill(BLACK.tup())
+    frame += 1
+
+    if input_manager.get_key_down(pygame.K_ESCAPE):
+        window.running = False
+
+    source.position.x += 1
+    blockers[0].position.y = 300 * math.sin(0.1 * frame)
 
     source.compute(blockers)
 
@@ -95,16 +112,6 @@ def start():
         blocker.render()
 
     source.render(GREEN, 25, WHITE)
-
-    set_window(window)
-
-
-def update():
-    global window
-    window = get_window()
-
-    if input_manager.get_key_down(pygame.K_ESCAPE):
-        window.running = False
 
     set_window(window)
 
