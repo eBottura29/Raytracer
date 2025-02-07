@@ -16,22 +16,22 @@ class CircleBlocker(Blocker):
         self.radius = radius
 
     def is_inside(self, point):
-        return (point.x - self.position.x) ** 2 + (point.y - self.position.y) ** 2 <= self.radius**2
+        return (point.x - self.position.x) ** 2 + (point.y - self.position.y) ** 2 < self.radius**2
 
     def render(self):
         draw_circle(window.SURFACE, self.color, self.position, self.radius)
 
 
 class RectBlocker(Blocker):
-    def __init__(self, position, color, dimentions):
+    def __init__(self, position, color, dimensions):
         super().__init__(position, color)
-        self.dimentions = dimentions
+        self.dimensions = dimensions
 
     def is_inside(self, point):
-        return self.position.x <= point.x and point.x < self.position.x + self.dimentions.x and self.position.y <= point.y and point.y < self.position.y + self.dimentions.y
+        return self.position.x <= point.x < self.position.x + self.dimensions.x and self.position.y <= point.y < self.position.y + self.dimensions.y
 
     def render(self):
-        draw_rectangle(window.SURFACE, self.color, self.position, self.dimentions)
+        draw_rectangle(window.SURFACE, self.color, self.position, self.dimensions)
 
 
 class Ray:
@@ -53,20 +53,18 @@ class Source:
 
         for i, ray in enumerate(self.rays):
             p = self.range / self.resolution
-            found = False
 
             for x in range(self.resolution):
-                for blocker in blockers:
-                    if blocker.is_inside(Vector2(self.position.x + p * x * math.cos(ray.theta), self.position.y + p * x * math.sin(ray.theta))):
-                        self.distances[i] = p * x
-                        found = True
-                        continue
+                test_point = Vector2(self.position.x + p * x * math.cos(ray.theta), self.position.y + p * x * math.sin(ray.theta))
 
-                if found == True:
+                for blocker in blockers:
+                    if blocker.is_inside(test_point):
+                        self.distances[i] = p * x
+                        break
+                else:
                     continue
 
-            if found == True:
-                continue
+                break
 
     def render(self, color, radius, ray_color):
         for i, ray in enumerate(self.rays):
