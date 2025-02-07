@@ -29,7 +29,7 @@ class Source:
 
     def compute(self, blockers):
         self.rays = [Ray(self.range, (i / self.num_rays) * 2 * math.pi) for i in range(self.num_rays)]
-        self.distances = [0 for _ in range(self.num_rays)]
+        self.distances = [self.range for _ in range(self.num_rays)]
 
         for i, ray in enumerate(self.rays):
             p = self.range / self.resolution
@@ -37,7 +37,7 @@ class Source:
 
             for x in range(self.resolution):
                 for blocker in blockers:
-                    if blocker.is_inside(Vector2(p * math.cos(ray.theta), p * math.sin(ray.theta))):
+                    if blocker.is_inside(Vector2(self.position.x + p * x * math.cos(ray.theta), self.position.y + p * x * math.sin(ray.theta))):
                         self.distances[i] = p * x
                         found = True
                         continue
@@ -49,14 +49,30 @@ class Source:
                 continue
 
     def render(self, color, radius, ray_color):
-        draw_circle(window.SURFACE, color, self.position, radius)
-
         for i, ray in enumerate(self.rays):
-            draw_line(window.SURFACE, ray_color, self.position, Vector2(self.distances[i] * math.cos(ray.theta), self.distances[i] * math.sin(ray.theta)))
+            draw_line(
+                window.SURFACE,
+                ray_color,
+                self.position,
+                Vector2(self.position.x + self.distances[i] * math.cos(ray.theta), self.position.y + self.distances[i] * math.sin(ray.theta)),
+            )
+
+        draw_circle(window.SURFACE, color, self.position, radius)
 
 
 def start():
-    pass
+    global window, source, blocker
+    window = get_window()
+
+    source = Source(Vector2(-200, 0), 100, 500, 100)
+    blocker = Blocker(Vector2(200, 0), 25, BLUE)
+
+    source.compute([blocker])
+
+    blocker.render()
+    source.render(GREEN, 25, WHITE)
+
+    set_window(window)
 
 
 def update():
