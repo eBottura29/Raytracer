@@ -7,7 +7,7 @@ class Blocker:
         self.color = color
 
     def is_inside(self, point):
-        return False
+        return self.position == point
 
 
 class CircleBlocker(Blocker):
@@ -28,7 +28,7 @@ class RectBlocker(Blocker):
         self.dimensions = dimensions
 
     def is_inside(self, point):
-        return self.position.x <= point.x < self.position.x + self.dimensions.x and self.position.y <= point.y < self.position.y + self.dimensions.y
+        return self.position.x <= point.x < self.position.x + self.dimensions.x and self.position.y - self.dimensions.y <= point.y < self.position.y
 
     def render(self):
         draw_rectangle(window.SURFACE, self.color, self.position, self.dimensions)
